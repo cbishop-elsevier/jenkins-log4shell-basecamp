@@ -136,6 +136,6 @@ if [ "${UPLOAD_SCAN_RESULTS_TO_GIT}" == "true" ]; then
   ${TOOLCHAIN_DIR}/codeql github upload-results --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --commit=${GITHUB_SHA} --sarif=/tmp/repo-to-scan-python.sarif;
 
   [[ "${LOG_DEBUG}" == "true" ]] && SCAN_CMD="${TOOLCHAIN_DIR}/codeql github upload-results --verbose --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --commit=${GITHUB_SHA} --sarif=/tmp/repo-to-scan-python.sarif --github-auth-stdin" \
-    && func_Logger "echo \$REPO_AUTH_TKN | ${SCAN_CMD};" || SCAN_CMD="${TOOLCHAIN_DIR}/codeql github upload-results --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --commit=${GITHUB_SHA} --sarif=/tmp/repo-to-scan-python.sarif --github-auth-stdin";
+    && func_Logger "${SCAN_CMD};" || SCAN_CMD="${TOOLCHAIN_DIR}/codeql github upload-results --repository=${GITHUB_REPOSITORY} --ref=${GITHUB_REF} --commit=${GITHUB_SHA} --sarif=/tmp/repo-to-scan-python.sarif --github-auth-stdin";
   echo $REPO_AUTH_TKN | ${SCAN_CMD};
 fi
