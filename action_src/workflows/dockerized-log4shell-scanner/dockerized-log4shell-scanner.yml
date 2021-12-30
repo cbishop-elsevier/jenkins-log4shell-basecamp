@@ -1,0 +1,58 @@
+name: Dockerized Log4Shell Scanner
+
+on:
+  # which repository events trigger this workflow
+  # See: https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows
+  # push:
+  #   branches: [ 'main' ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    # what GitHub Hosted Runner (could be Self Hosted, Later) container base image to run on
+    # See: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    # TODO: Add ability to pass specific dirs for scan - this will require additional mods to scripts/runScan.sh!
+    env:
+      DIRS_TO_SCAN: "relative/sub/dir/num1 rel/sub/2"
+    # Workflow Job Steps
+    steps:
+      # Use the Github default Checkout Action to checkout the repository to scan
+      # See: https://github.com/actions/checkout#usage
+      - name: Checkout Repository For Scanning
+        uses: actions/checkout@v2
+        with:
+          repository: cbishop-elsevier/jenkins-log4shell-basecamp
+          # this is a RELATIVE subdirectory BELOW env.GITHUB_WORKSPACE
+          path: repo-to-scan
+
+      # Use the Github default Checkout Action to checkout the scanning toolchain repository
+      # See: https://github.com/jfrog/log4j-tools
+      - name: Checkout Scanning Toolchain
+        uses: actions/checkout@v2
+        with:
+          # this is the repository where the scanning toolchain assets should be obtained from
+          repository: jfrog/log4j-tools
+          # this is a RELATIVE subdirectory BELOW env.GITHUB_WORKSPACE
+          path: repo-scan-tools
+
+      # Setup custom Python 3.X environment on GitHub Hosted Runner Instance, cache all pip installed dependencies for better efficiency
+      # See: https://github.com/actions/setup-python#usage
+      - name: Config PyVE
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          cache: "pip"
+
+      # Install Scan Toolchain Specific Dependencies
+      - name: Instal Scan Toolchain Deps
+        run: pip install -r repo-scan-tools/requirements.txt
+
+      # Run Custom Bash Script
+      - name: Run script file
+        run: |
+          chmod +x repo-to-scan/.github/workflows/scripts/runScan.sh
+          repo-to-scan/.github/workflows/scripts/runScan.sh
